@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const noteData = require('./db/db.json');
+const fs = require('fs');
+const { stringify } = require('querystring');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +18,30 @@ app.get('/notes', (req, res) => {
 
 app.get('/api/notes', (req, res) => {
     res.json(noteData);
+});
+
+app.post('/api/notes', (req, res) =>{
+    const {title, text} = req.body;
+
+    if(title && text) {
+        const newNote = {
+            title,
+            text
+        };
+
+        const response = {
+            status: 'Success!',
+            body: newNote
+        };
+
+        fs.appendFileSync('db/db.json', JSON.stringify(newNote), (err) => {
+            if (err) throw err;
+            console.log(response);
+            res.status(201).json(response);
+        })
+    } else {
+        res.status(500).json('Note failed to post')
+    }
 });
 
 app.listen(PORT, () =>
