@@ -19,6 +19,7 @@ This app allows users to quickly jot down notes and save them for later use. The
 ## Links
 
 GitHub Repo Page: https://github.com/rambriz91/quick-jot
+Heroku Deployment URL: https://quick-jot-7e09e8f5180a.herokuapp.com/
 
 ## Credits
 - https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options
