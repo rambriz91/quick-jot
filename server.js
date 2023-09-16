@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
-const noteData = require('./db/db.json');
 const fs = require('fs');
-const { stringify } = require('querystring');
+const uuid = require('./public/assets/js/uuid');
+
+let jsonData = JSON.parse(fs.readFileSync('db/db.json', 'utf8'));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,14 +18,10 @@ app.get('/notes', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-    
-    const jsonData = JSON.parse(fs.readFileSync('db/db.json', 'utf8'));
     res.json(jsonData);
 });
 
 app.post('/api/notes', (req, res) =>{
-    const jsonData = JSON.parse(fs.readFileSync('db/db.json', 'utf8'));
-    console.log('jsonData:', jsonData);
     const {title, text} = req.body;
 
     console.log('req.body:', req.body)
@@ -32,7 +29,8 @@ app.post('/api/notes', (req, res) =>{
     if(title && text) {
         const postNote = {
             title,
-            text
+            text,
+            id: uuid(),
         };
 
         console.log('postNote:', postNote)
@@ -43,20 +41,36 @@ app.post('/api/notes', (req, res) =>{
         };
 
         console.log('response', response);
-        if (jsonData.includes(postNote.title && postNote.text)){
-            console.log('Note already exists!');
-            return;
-        } else {jsonData.push(postNote);}
+        jsonData.push(postNote);
 
         fs.writeFileSync('db/db.json', JSON.stringify(jsonData), (err) => {
             if (err) throw err;
             console.log(response);
             res.status(201).json(response);
         })
+        .then((res) => {
+            return res.body;
+        });
     } else {
         res.status(500).json('Note failed to post')
     }
-    return jsonData;
+});
+
+app.delete("/api/notes/:id", function (req, res) {
+    
+    jsonData = jsonData.filter(({ id }) => id !== req.params.id);
+    
+    fs.writeFileSync(
+        './db/db.json',
+        JSON.stringify(postData),
+        (err) => {
+            if (err) throw err;
+            console.info('Successfully deleted notes!')
+        })
+        .then((res) => {
+            return res.body;
+        }
+        )
 });
 
 app.listen(PORT, () =>
