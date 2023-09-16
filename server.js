@@ -31,7 +31,7 @@ app.post('/api/notes', (req, res) =>{
 
         const response = {
             status: 'Success!',
-            body: newNote
+            body: newNote,
         };
 
         fs.appendFileSync('db/db.json', JSON.stringify(newNote), (err) => {
