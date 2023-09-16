@@ -13,6 +13,7 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//Get requests
 app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/notes.html'));
 });
@@ -20,7 +21,7 @@ app.get('/notes', (req, res) => {
 app.get('/api/notes', (req, res) => {
     res.json(jsonData);
 });
-
+//Post request
 app.post('/api/notes', (req, res) =>{
     const {title, text} = req.body;
 
@@ -33,44 +34,32 @@ app.post('/api/notes', (req, res) =>{
             id: uuid(),
         };
 
-        console.log('postNote:', postNote)
+        jsonData.push(postNote);
 
+        fs.writeFileSync('db/db.json', JSON.stringify(jsonData), (err) => {
+            if (err) throw err; 
+            console.log('Data written to file successfully');
+            res.status(201).json(response);
+        });
         const response = {
             status: 'Success!',
             body: postNote,
         };
-
-        console.log('response', response);
-        jsonData.push(postNote);
-
-        fs.writeFileSync('db/db.json', JSON.stringify(jsonData), (err) => {
-            if (err) throw err;
-            console.log(response);
-            res.status(201).json(response);
-        })
-        .then((res) => {
-            return res.body;
-        });
+        res.status(201).json(response);
     } else {
-        res.status(500).json('Note failed to post')
+        res.status(400).json('Note failed to post!')
     }
 });
-
+//Delete Request
 app.delete("/api/notes/:id", function (req, res) {
     
     jsonData = jsonData.filter(({ id }) => id !== req.params.id);
     
-    fs.writeFileSync(
-        './db/db.json',
-        JSON.stringify(postData),
-        (err) => {
+    fs.writeFileSync('./db/db.json', JSON.stringify(jsonData),(err) => {
             if (err) throw err;
             console.info('Successfully deleted notes!')
-        })
-        .then((res) => {
-            return res.body;
-        }
-        )
+        });
+        res.status(204).send();
 });
 
 app.listen(PORT, () =>
